@@ -32,6 +32,7 @@ Makefile.in
 ascii.bitmaps
 genkernsyms.sh
 gensymlist.sh
+gpt_unit_test
 grub-bin2h
 grub-emu
 grub-emu-lite
