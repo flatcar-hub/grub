@@ -58,7 +58,7 @@ struct grub_fs pseudo_fs =
   {
     .name = "pseudo",
     .read = pseudo_read
-};
+  };
 
 static grub_err_t
 read_packet_header (grub_file_t sig, grub_uint8_t *out_type, grub_size_t *len)
@@ -995,21 +995,6 @@ grub_env_write_sec (struct grub_env_var *var __attribute__ ((unused)),
   return grub_strdup (sec ? "enforce" : "no");
 }
 
-static grub_ssize_t 
-pseudo_read (struct grub_file *file, char *buf, grub_size_t len)
-{
-  grub_memcpy (buf, (grub_uint8_t *) file->data + file->offset, len);
-  return len;
-}
-
-
-/* Filesystem descriptor.  */
-struct grub_fs pseudo_fs = 
-  {
-    .name = "pseudo",
-    .read = pseudo_read
-  };
-
 struct grub_file_verifier grub_pubkey_verifier =
   {
     .name = "pgp",
@@ -1019,7 +1004,6 @@ struct grub_file_verifier grub_pubkey_verifier =
     .close = grub_pubkey_close,
   };
 
-verifiers: Framework core
 static grub_extcmd_t cmd, cmd_trust;
 static grub_command_t cmd_trust_var, cmd_distrust, cmd_list;
 
