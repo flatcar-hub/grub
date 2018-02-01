@@ -35,7 +35,7 @@ grub_xen_file_and_cmdline (grub_file_t file,
 			   grub_size_t cmdline_max_len)
 {
   grub_elf_t elf;
-  struct linux_kernel_header lh;
+  struct linux_i386_kernel_header lh;
   grub_file_t off_file;
   grub_uint32_t payload_offset, payload_length;
   grub_uint8_t magic[6];
