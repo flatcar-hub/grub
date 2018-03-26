@@ -91,7 +91,7 @@ struct grub_gpt_header
 
 struct grub_gpt_partentry
 {
-  grub_gpt_part_type_t type;
+  grub_gpt_guid_t type;
   grub_gpt_guid_t guid;
   grub_uint64_t start;
   grub_uint64_t end;
