@@ -23,18 +23,17 @@
 #include <grub/partition.h>
 #include <grub/msdos_partition.h>
 
-struct grub_gpt_guid
+struct grub_gpt_part_guid
 {
   grub_uint32_t data1;
   grub_uint16_t data2;
   grub_uint16_t data3;
   grub_uint8_t data4[8];
 } GRUB_PACKED;
-typedef struct grub_gpt_guid grub_gpt_guid_t;
-typedef struct grub_gpt_guid grub_gpt_part_type_t;
+typedef struct grub_gpt_part_guid grub_gpt_part_guid_t;
 
 /* Format the raw little-endian GUID as a newly allocated string.  */
-char * grub_gpt_guid_to_str (grub_gpt_guid_t *guid);
+char * grub_gpt_guid_to_str (grub_gpt_part_guid_t *guid);
 
 
 #define GRUB_GPT_GUID_INIT(a, b, c, d1, d2, d3, d4, d5, d6, d7, d8)  \
@@ -82,7 +81,7 @@ struct grub_gpt_header
   grub_uint64_t alternate_lba;
   grub_uint64_t start;
   grub_uint64_t end;
-  grub_gpt_guid_t guid;
+  grub_gpt_part_guid_t guid;
   grub_uint64_t partitions;
   grub_uint32_t maxpart;
   grub_uint32_t partentry_size;
@@ -91,8 +90,8 @@ struct grub_gpt_header
 
 struct grub_gpt_partentry
 {
-  grub_gpt_guid_t type;
-  grub_gpt_guid_t guid;
+  grub_gpt_part_guid_t type;
+  grub_gpt_part_guid_t guid;
   grub_uint64_t start;
   grub_uint64_t end;
   grub_uint64_t attrib;

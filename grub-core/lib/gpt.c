@@ -39,7 +39,7 @@ grub_gpt_read_entries (grub_disk_t disk, grub_gpt_t gpt,
 		       grub_size_t *ret_entries_size);
 
 char *
-grub_gpt_guid_to_str (grub_gpt_guid_t *guid)
+grub_gpt_guid_to_str (grub_gpt_part_guid_t *guid)
 {
   return grub_xasprintf ("%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x",
 			 grub_le_to_cpu32 (guid->data1),
@@ -308,7 +308,7 @@ grub_gpt_headers_equal (grub_gpt_t gpt)
     return 0;
 
   return grub_memcmp(&gpt->primary.guid, &gpt->backup.guid,
-                     sizeof(grub_gpt_guid_t)) == 0;
+                     sizeof(grub_gpt_part_guid_t)) == 0;
 }
 
 static grub_err_t
