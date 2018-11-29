@@ -174,8 +174,9 @@ grub_multiboot_load (grub_file_t file, const char *filename)
       return grub_errno;
     }
 
-  grub_tpm_measure((unsigned char*)buffer, len, GRUB_BINARY_PCR, "grub_multiboot", filename);
-  grub_print_error();
+  // TODO figure out the GRUB_VERIFY_ equivalent for this one
+  //grub_tpm_measure((unsigned char*)buffer, len, GRUB_BINARY_PCR, filename);
+  //grub_print_error();
 
   header = find_header (buffer, len);
 

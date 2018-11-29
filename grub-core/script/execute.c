@@ -960,9 +960,6 @@ grub_script_execute_cmdline (struct grub_script_cmd *cmd)
 			       argv.args[i]);
     }
   cmdstring[cmdlen - 1] = '\0';
-  grub_tpm_measure ((unsigned char *)cmdstring, cmdlen, GRUB_ASCII_PCR,
-		    "grub_cmd", cmdstring);
-  grub_print_error();
   grub_verify_string (cmdstring, GRUB_VERIFY_COMMAND);
   grub_free (cmdstring);
   invert = 0;
