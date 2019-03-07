@@ -43,11 +43,19 @@ static grub_uint8_t grub_userclass[] = {0x4D, 0x06, 0x05, 'G', 'R', 'U', 'B', '2
 static grub_uint8_t grub_dhcpdiscover[] = {0x35, 0x01, 0x01};
 static grub_uint8_t grub_dhcptime[] = {0x33, 0x04, 0x00, 0x00, 0x0e, 0x10};
 
+enum
+{
+  GRUB_DHCP_OPT_OVERLOAD_FILE = 1,
+  GRUB_DHCP_OPT_OVERLOAD_SNAME = 2,
+};
+
 static const void *
 find_dhcp_option (const struct grub_net_bootp_packet *bp, grub_size_t size,
 		  grub_uint8_t opt_code, grub_uint8_t *opt_len)
 {
   const grub_uint8_t *ptr;
+  grub_uint8_t overload = 0;
+  int end = 0;
   grub_size_t i;
 
   if (opt_len)
@@ -72,6 +80,7 @@ find_dhcp_option (const struct grub_net_bootp_packet *bp, grub_size_t size,
   size -= sizeof (*bp);
   i = sizeof (grub_uint32_t);
 
+again:
   while (i < size)
     {
       grub_uint8_t tagtype;
@@ -85,7 +94,10 @@ find_dhcp_option (const struct grub_net_bootp_packet *bp, grub_size_t size,
 
       /* End tag.  */
       if (tagtype == GRUB_NET_BOOTP_END)
-	break;
+	{
+	  end = 1;
+	  break;
+	}
 
       if (i >= size)
 	return NULL;
@@ -102,8 +114,53 @@ find_dhcp_option (const struct grub_net_bootp_packet *bp, grub_size_t size,
 	  return &ptr[i];
 	}
 
+      if (tagtype == GRUB_NET_DHCP_OVERLOAD && taglength == 1)
+	overload = ptr[i];
+
       i += taglength;
     }
+
+  if (!end)
+    return NULL;
+
+  /* RFC2131, 4.1, 23ff:
+   * If the options in a DHCP message extend into the 'sname' and 'file'
+   * fields, the 'option overload' option MUST appear in the 'options'
+   * field, with value 1, 2 or 3, as specified in RFC 1533.  If the
+   * 'option overload' option is present in the 'options' field, the
+   * options in the 'options' field MUST be terminated by an 'end' option,
+   * and MAY contain one or more 'pad' options to fill the options field.
+   * The options in the 'sname' and 'file' fields (if in use as indicated
+   * by the 'options overload' option) MUST begin with the first octet of
+   * the field, MUST be terminated by an 'end' option, and MUST be
+   * followed by 'pad' options to fill the remainder of the field.  Any
+   * individual option in the 'options', 'sname' and 'file' fields MUST be
+   * entirely contained in that field.  The options in the 'options' field
+   * MUST be interpreted first, so that any 'option overload' options may
+   * be interpreted.  The 'file' field MUST be interpreted next (if the
+   * 'option overload' option indicates that the 'file' field contains
+   * DHCP options), followed by the 'sname' field.
+   *
+   * FIXME: We do not explicitly check for trailing 'pad' options here.
+   */
+  end = 0;
+  if (overload & GRUB_DHCP_OPT_OVERLOAD_FILE)
+  {
+    overload &= ~GRUB_DHCP_OPT_OVERLOAD_FILE;
+    ptr = (grub_uint8_t *) &bp->boot_file[0];
+    size = sizeof (bp->boot_file);
+    i = 0;
+    goto again;
+  }
+
+  if (overload & GRUB_DHCP_OPT_OVERLOAD_SNAME)
+  {
+    overload &= ~GRUB_DHCP_OPT_OVERLOAD_SNAME;
+    ptr = (grub_uint8_t *) &bp->server_name[0];
+    size = sizeof (bp->server_name);
+    i = 0;
+    goto again;
+  }
 
   return NULL;
 }
