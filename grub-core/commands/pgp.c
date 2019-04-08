@@ -46,20 +46,6 @@ static const struct grub_arg_option options[] =
     {0, 0, 0, 0, 0, 0}
   };
 
-static grub_ssize_t
-pseudo_read (struct grub_file *file, char *buf, grub_size_t len)
-{
-  grub_memcpy (buf, (grub_uint8_t *) file->data + file->offset, len);
-  return len;
-}
-
-/* Filesystem descriptor.  */
-struct grub_fs pseudo_fs =
-  {
-    .name = "pseudo",
-    .read = pseudo_read
-  };
-
 static grub_err_t
 read_packet_header (grub_file_t sig, grub_uint8_t *out_type, grub_size_t *len)
 {
@@ -772,6 +758,20 @@ grub_cmd_trust (grub_extcmd_context_t ctxt,
 
   return GRUB_ERR_NONE;
 }
+
+static grub_ssize_t 
+pseudo_read (struct grub_file *file, char *buf, grub_size_t len)
+{
+  grub_memcpy (buf, (grub_uint8_t *) file->data + file->offset, len);
+  return len;
+}
+
+/* Filesystem descriptor.  */
+struct grub_fs pseudo_fs = 
+  {
+    .name = "pseudo",
+    .fs_read = pseudo_read
+  };
 
 static grub_err_t
 grub_cmd_trust_var (grub_command_t cmd __attribute__ ((unused)),
