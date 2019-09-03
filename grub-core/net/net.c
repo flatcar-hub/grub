@@ -1324,10 +1324,14 @@ grub_net_open_real (const char *name)
 	    ret->server = grub_strdup (server);
 	    if (!ret->server)
 	      {
-		grub_free (ret);
-		return NULL;
+		ret->server = grub_strdup (server);
+		ret->port = port;
+		if (!ret->server)
+		  {
+		    grub_free (ret);
+		    return NULL;
+		  }
 	      }
-	    ret->port = port;
 	    ret->fs = &grub_net_fs;
 	    return ret;
 	  }

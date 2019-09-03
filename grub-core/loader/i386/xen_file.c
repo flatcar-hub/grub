@@ -19,7 +19,6 @@
 #include <grub/xen_file.h>
 #include <grub/i386/linux.h>
 #include <grub/misc.h>
-
 #include <grub/verity-hash.h>
 
 #define XZ_MAGIC "\3757zXZ\0"
