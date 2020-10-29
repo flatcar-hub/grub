@@ -132,14 +132,12 @@ typedef struct tdEFI_TCG2_BOOT_SERVICE_CAPABILITY EFI_TCG2_BOOT_SERVICE_CAPABILI
 typedef grub_efi_uint32_t TCG_PCRINDEX;
 typedef grub_efi_uint32_t TCG_EVENTTYPE;
 
-struct tdEFI_TCG2_EVENT_HEADER
-{
+typedef struct tdEFI_TCG2_EVENT_HEADER {
   grub_efi_uint32_t HeaderSize;
   grub_efi_uint16_t HeaderVersion;
-  TCG_PCRINDEX      PCRIndex;
-  TCG_EVENTTYPE     EventType;
-} GRUB_PACKED;
-typedef struct tdEFI_TCG2_EVENT_HEADER EFI_TCG2_EVENT_HEADER;
+  TCG_PCRINDEX PCRIndex;
+  TCG_EVENTTYPE EventType;
+} GRUB_PACKED EFI_TCG2_EVENT_HEADER;
 
 struct tdEFI_TCG2_EVENT
 {
@@ -161,7 +159,7 @@ struct grub_efi_tpm2_protocol
 				      EventLogLocation,
 				      grub_efi_physical_address_t *
 				      EventLogLastEntry,
-				      grub_efi_boolean_t * EventLogTruncated);
+				      grub_efi_boolean_t *EventLogTruncated);
   grub_efi_status_t (*hash_log_extend_event) (struct grub_efi_tpm2_protocol *
 					      this, grub_efi_uint64_t Flags,
 					      grub_efi_physical_address_t

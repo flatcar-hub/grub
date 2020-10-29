@@ -25,6 +25,20 @@
 #include <grub/net/udp.h>
 #include <grub/datetime.h>
 
+#if !defined(GRUB_MACHINE_EFI) && (defined(__i386__) || defined(__x86_64__))
+#define GRUB_NET_BOOTP_ARCH 0x0000
+#elif defined(GRUB_MACHINE_EFI) && defined(__x86_64__)
+#define GRUB_NET_BOOTP_ARCH 0x0007
+#elif defined(GRUB_MACHINE_EFI) && defined(__aarch64__)
+#define GRUB_NET_BOOTP_ARCH 0x000B
+#else
+#error "unknown bootp architecture"
+#endif
+
+static grub_uint8_t grub_userclass[] = {0x4D, 0x06, 0x05, 'G', 'R', 'U', 'B', '2'};
+static grub_uint8_t grub_dhcpdiscover[] = {0x35, 0x01, 0x01};
+static grub_uint8_t grub_dhcptime[] = {0x33, 0x04, 0x00, 0x00, 0x0e, 0x10};
+
 struct grub_dhcp_discover_options
 {
   grub_uint8_t magic[4];
@@ -84,11 +98,6 @@ enum
   GRUB_DHCP_MESSAGE_RELEASE,
   GRUB_DHCP_MESSAGE_INFORM,
 };
-
-#define GRUB_BOOTP_MAX_OPTIONS_SIZE 64
-
-/* Max timeout when waiting for BOOTP/DHCP reply */
-#define GRUB_DHCP_MAX_PACKET_TIMEOUT 32
 
 #define GRUB_BOOTP_MAX_OPTIONS_SIZE 64
 
@@ -429,6 +438,7 @@ send_dhcp_packet (struct grub_net_network_level_interface *iface)
   struct udphdr *udph;
   grub_net_network_level_address_t target;
   grub_net_link_level_address_t ll_target;
+  grub_uint8_t *offset;
 
   static struct grub_dhcp_discover_options discover_options =
     {
@@ -488,19 +498,31 @@ send_dhcp_packet (struct grub_net_network_level_interface *iface)
   COMPILE_TIME_ASSERT (sizeof (discover_options) <= GRUB_BOOTP_MAX_OPTIONS_SIZE);
   COMPILE_TIME_ASSERT (sizeof (request_options) <= GRUB_BOOTP_MAX_OPTIONS_SIZE);
 
-  nb = grub_netbuff_alloc (sizeof (*pack) + GRUB_BOOTP_MAX_OPTIONS_SIZE + 128);
+  nb = grub_netbuff_alloc (sizeof (*pack) + sizeof(grub_userclass)
+				   + sizeof(grub_dhcpdiscover)
+				   + sizeof(grub_dhcptime)
+				   + GRUB_BOOTP_MAX_OPTIONS_SIZE + 128);
   if (!nb)
     return grub_errno;
 
-  err = grub_netbuff_reserve (nb, sizeof (*pack) + GRUB_BOOTP_MAX_OPTIONS_SIZE + 128);
+  err = grub_netbuff_reserve (nb, sizeof (*pack) + sizeof(grub_userclass)
+				   + sizeof(grub_dhcpdiscover)
+				   + sizeof(grub_dhcptime)
+				   + GRUB_BOOTP_MAX_OPTIONS_SIZE + 128);
   if (err)
     goto out;
 
-  err = grub_netbuff_push (nb, GRUB_BOOTP_MAX_OPTIONS_SIZE);
+  err = grub_netbuff_push (nb, sizeof(grub_userclass)
+				   + sizeof(grub_dhcpdiscover)
+				   + sizeof(grub_dhcptime)
+				   + GRUB_BOOTP_MAX_OPTIONS_SIZE);
   if (err)
     goto out;
 
-  grub_memset (nb->data, 0, GRUB_BOOTP_MAX_OPTIONS_SIZE);
+  grub_memset (nb->data, 0, sizeof(grub_userclass)
+				   + sizeof(grub_dhcpdiscover)
+				   + sizeof(grub_dhcptime)
+				   + GRUB_BOOTP_MAX_OPTIONS_SIZE);
   if (!iface->srv_id)
     {
       grub_memcpy (nb->data, &discover_options, sizeof (discover_options));
@@ -537,6 +559,22 @@ send_dhcp_packet (struct grub_net_network_level_interface *iface)
     pack->ident = iface->xid;
 
   grub_memcpy (&pack->mac_addr, &iface->hwaddress.mac, 6);
+  offset = (grub_uint8_t *)&pack->vendor;
+  grub_memcpy (offset, grub_dhcpdiscover, sizeof(grub_dhcpdiscover));
+  offset += sizeof(grub_dhcpdiscover);
+  grub_memcpy (offset, grub_userclass, sizeof(grub_userclass));
+  offset += sizeof(grub_userclass);
+  grub_memcpy (offset, grub_dhcptime, sizeof(grub_dhcptime));
+
+  /* insert Client System Architecture (option 93) */
+  offset += sizeof(grub_dhcptime);
+  offset[0] = 93;
+  offset[1] = 2;
+  offset[2] = (GRUB_NET_BOOTP_ARCH >> 8);
+  offset[3] = (GRUB_NET_BOOTP_ARCH & 0xFF);
+
+  /* option terminator */
+  offset[4] = 255;
 
   grub_netbuff_push (nb, sizeof (*udph));
 

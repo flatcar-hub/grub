@@ -50,6 +50,7 @@
 #include <grub/video.h>
 #include <grub/memory.h>
 #include <grub/i18n.h>
+#include <grub/tpm.h>
 
 GRUB_MOD_LICENSE ("GPLv3+");
 
@@ -437,6 +438,9 @@ grub_cmd_module (grub_command_t cmd __attribute__ ((unused)),
     }
 
   grub_file_close (file);
+  // TODO figure out the GRUB_VERIFY_ equivalent for this one
+  //grub_tpm_measure (module, size, GRUB_BINARY_PCR, argv[0]);
+  //grub_print_error();
   return GRUB_ERR_NONE;
 }
 

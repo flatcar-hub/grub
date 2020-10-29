@@ -1261,7 +1261,7 @@ grub_net_open_real (const char *name)
   grub_net_app_level_t proto;
   const char *protname, *server;
   grub_size_t protnamelen;
-  int try;
+  int try, port = 0;
 
   if (grub_strncmp (name, "pxe:", sizeof ("pxe:") - 1) == 0)
     {
@@ -1278,7 +1278,18 @@ grub_net_open_real (const char *name)
   else
     {
       const char *comma;
+      char *colon;
       comma = grub_strchr (name, ',');
+      if (!comma)
+	{
+	  comma = grub_strchr (name, ';');
+	}
+      colon = grub_strchr (name, ':');
+      if (colon)
+	{
+	  port = (int) grub_strtol(colon+1, NULL, 10);
+	  *colon = '\0';
+	}
       if (comma)
 	{
 	  protnamelen = comma - name;
@@ -1313,8 +1324,13 @@ grub_net_open_real (const char *name)
 	    ret->server = grub_strdup (server);
 	    if (!ret->server)
 	      {
-		grub_free (ret);
-		return NULL;
+		ret->server = grub_strdup (server);
+		ret->port = port;
+		if (!ret->server)
+		  {
+		    grub_free (ret);
+		    return NULL;
+		  }
 	      }
 	    ret->fs = &grub_net_fs;
 	    return ret;

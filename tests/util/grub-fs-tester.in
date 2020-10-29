@@ -600,7 +600,7 @@ for LOGSECSIZE in $(range "$MINLOGSECSIZE" "$MAXLOGSECSIZE" 1); do
 	    GENERATED=n
 	    LODEVICES=
 	    MOUNTDEVICE=
-	    
+
 	    case x"$fs" in
 		x"tarfs" | x"cpio_"*| x"ziso9660" | x"romfs" | x"squash4_"*\
                     | x"iso9660" | xjoliet | xrockridge | xrockridge_joliet \

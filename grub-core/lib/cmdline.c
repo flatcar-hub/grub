@@ -19,6 +19,7 @@
 
 #include <grub/lib/cmdline.h>
 #include <grub/misc.h>
+#include <grub/tpm.h>
 
 static unsigned int check_arg (char *c, int *has_space)
 {

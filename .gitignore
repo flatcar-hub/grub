@@ -45,6 +45,7 @@ gensymlist.sh
 gentrigtables
 gentrigtables.exe
 gettext_strings_test
+gpt_unit_test
 /gnulib
 grub-bin2h
 /grub-bios-setup

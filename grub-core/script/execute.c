@@ -27,6 +27,7 @@
 #include <grub/normal.h>
 #include <grub/extcmd.h>
 #include <grub/i18n.h>
+#include <grub/tpm.h>
 #include <grub/verify.h>
 
 /* Max digits for a char is 3 (0xFF is 255), similarly for an int it
