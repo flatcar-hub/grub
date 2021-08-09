@@ -32,24 +32,25 @@ struct grub_gpt_part_guid
 } GRUB_PACKED;
 typedef struct grub_gpt_part_guid grub_gpt_part_guid_t;
 
-#define GRUB_GPT_PARTITION_TYPE_EMPTY \
-  { 0x0, 0x0, 0x0, \
-    { 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 } \
+#define GRUB_GPT_GUID_INIT(a, b, c, d1, d2, d3, d4, d5, d6, d7, d8)  \
+  {					\
+    grub_cpu_to_le32_compile_time (a),	\
+    grub_cpu_to_le16_compile_time (b),	\
+    grub_cpu_to_le16_compile_time (c),	\
+    { d1, d2, d3, d4, d5, d6, d7, d8 }	\
   }
+
+#define GRUB_GPT_PARTITION_TYPE_EMPTY \
+  GRUB_GPT_GUID_INIT (0x0, 0x0, 0x0,  \
+      0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0)
 
 #define GRUB_GPT_PARTITION_TYPE_BIOS_BOOT \
-  { grub_cpu_to_le32_compile_time (0x21686148), \
-      grub_cpu_to_le16_compile_time (0x6449), \
-      grub_cpu_to_le16_compile_time (0x6e6f),	       \
-    { 0x74, 0x4e, 0x65, 0x65, 0x64, 0x45, 0x46, 0x49 } \
-  }
+  GRUB_GPT_GUID_INIT (0x21686148, 0x6449, 0x6e6f, \
+      0x74, 0x4e, 0x65, 0x65, 0x64, 0x45, 0x46, 0x49)
 
 #define GRUB_GPT_PARTITION_TYPE_LDM \
-  { grub_cpu_to_le32_compile_time (0x5808C8AAU),\
-      grub_cpu_to_le16_compile_time (0x7E8F), \
-      grub_cpu_to_le16_compile_time (0x42E0),	       \
-	{ 0x85, 0xD2, 0xE1, 0xE9, 0x04, 0x34, 0xCF, 0xB3 }	\
-  }
+  GRUB_GPT_GUID_INIT (0x5808c8aa, 0x7e8f, 0x42e0, \
+      0x85, 0xd2, 0xe1, 0xe9, 0x04, 0x34, 0xcf, 0xb3)
 
 #define GRUB_GPT_PARTITION_TYPE_USR_X86_64 \
   GRUB_GPT_GUID_INIT (0x5dfbf5f4, 0x2848, 0x4bac, \
